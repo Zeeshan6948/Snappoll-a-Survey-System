@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "922379001254",
+    "project_id": "snappoll-181d5",
+    "storage_bucket": "snappoll-181d5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:922379001254:android:7fca674a379f997b194367",
+        "android_client_info": {
+          "package_name": "com.example.snap_poll"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "922379001254-thnclamou61po87rt982sd38og42k86v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.snap_poll",
+            "certificate_hash": "cad2ecabd8dfa65fe0775e8a3f4356fa6bfed57c"
+          }
+        },
+        {
+          "client_id": "922379001254-st45q0go1kekjd5v0acl17aisu4p6fks.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATFlI_ELipI9OabbzS-suQ0TmVIMos_hs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "922379001254-st45q0go1kekjd5v0acl17aisu4p6fks.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

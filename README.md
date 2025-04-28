@@ -4,12 +4,15 @@
 A **cross-platform survey application** built with **Flutter (Dart)** for **mobile** and **web**.  
 This system was developed as part of a **university-based project** aimed at building a full-fledged survey solution for academic and commercial use. It enables users to create and manage surveys, share them via QR codes, collect and analyze responses, and manage access rights seamlessly across different platforms.
 
+The project is designed to be versatile and scalable, making it a perfect tool for academic institutions, businesses, and individuals who need to conduct surveys efficiently. It can be used for market research, academic research, feedback collection, event planning, and customer satisfaction surveys. The easy-to-use interface ensures that users with little technical knowledge can create and distribute surveys. With mobile and web compatibility, participants can conveniently complete surveys on any device. The platform ensures data security and anonymity, making it ideal for sensitive surveys. Future updates aim to enhance real-time analytics and support additional languages. Overall, this project is a robust, ready-to-deploy survey management system.
+
 ---
 
 ## 🚀 Features
 
 - **Create Leads and Manage Access**: Organize and control survey access among different users and teams.
 - **QR Code Sharing for Surveys**: Instantly generate and share QR codes for quick survey access.
+- **Scan QR Code to Access Surveys**: Scan QR codes to directly access publicly available or private surveys.
 - **Survey Templates Creation**: Design and reuse custom templates to speed up survey creation.
 - **Multiple Question Types**:
   - **Single Choice**: Select one option from a list.
@@ -18,13 +21,17 @@ This system was developed as part of a **university-based project** aimed at bui
   - **Multi Rating**: Rate multiple aspects simultaneously.
   - **Yes/No**: Simple binary choice.
   - **Open Text Input**: Free-form text responses.
+- **Speech to Text for Open Text Questions**: Use voice input for open text responses, making it easier to answer lengthy questions.
+- **Survey Progress Bar**: A progress bar at the top indicates how much of the survey has been completed while answering.
+- **Suggestion Option for Questions**: If a user prefers not to answer a question, they can leave a suggestion instead.
+- **Mandatory Answering**: Currently, answering all questions is mandatory to complete a survey.
+- **Drag and Drop Question Ordering**: Easily change the hierarchy of questions via drag-and-drop functionality, organized into sections for better clarity and usability.
 - **User Authentication**: Secure login and registration system to protect data and personalize user experience.
 - **Multi-language Support**: Currently supporting **German** in addition to English.
 - **Mobile and Web Compatible**: Designed for seamless use across smartphones, tablets, and web browsers.
-- **Backend Connectivity**:
-  - **Supabase** for mobile backend.
-  - **Django (Python) backend** for web frontend (under active development).
-- **PostgreSQL** as the main database engine.
+- **Export Survey Results to CSV**: Save survey results in CSV file format for easy sharing and further analysis.
+- **Response Timing**: Track the time each user takes to answer each question.
+- **Privacy and Data Protection**: No personal data is collected from survey respondents, ensuring complete anonymity and data security.
 
 ---
 
@@ -34,11 +41,16 @@ This system was developed as part of a **university-based project** aimed at bui
 
 | Feature | Screenshot |
 | :--- | :--- |
-| Home Page | ![Home](screenshots/home.png) |
-| Create Survey | ![Create Survey](screenshots/create_survey.png) |
-| QR Code Sharing | ![QR Code](screenshots/qr_code.png) |
-| Answering Survey | ![Answer Survey](screenshots/answer_survey.png) |
-| Survey Results | ![Survey Results](screenshots/survey_results.png) |
+| Home Page | ![Home](screenshots/home.jpg) |
+| Create Survey | ![Create Survey](screenshots/create_survey.jpg) |
+| QR Code Sharing | ![QR Code](screenshots/qr_code.jpg) |
+| Answering Survey | ![Answer Survey](screenshots/answer_survey.jpg) |
+| Survey Results | ![Survey Results](screenshots/survey_results.jpg) |
+| Single Choice Question | ![Single Choice](SingleChoice/home.jpg) |
+| Questions Available | ![Questions Available](screenshots/Questions.jpg) |
+| Manage Surveys | ![Manage Surveys](screenshots/Manage_Surveys.jpg) |
+| Survey Access Control | ![Survey Access](screenshots/Survey_Access.jpg) |
+| Survey Completed | ![Survey Completed](screenshots/Survey_Completed.jpg) |
 
 > **Tip:** Place your screenshots inside a `screenshots/` folder in your repository.
 
@@ -46,10 +58,10 @@ This system was developed as part of a **university-based project** aimed at bui
 
 ## 🛠️ Technologies Used
 
-- **Flutter (Dart)**: Google's UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.
-- **Supabase**: An open-source Firebase alternative, providing authentication, real-time databases, storage, and auto-generated APIs.
-- **Python Django**: A high-level Python web framework that encourages rapid development and clean, pragmatic design.
-- **PostgreSQL**: A powerful, open-source object-relational database system known for reliability, feature robustness, and performance.
+- **Flutter (Dart)**: Google's UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase, with fast development cycles and expressive UI components.
+- **Supabase**: An open-source Firebase alternative providing essential backend services like authentication, real-time databases, file storage, and serverless functions.
+- **Python Django**: A high-level Python web framework that enables rapid development of secure and maintainable websites with built-in features like ORM, admin panel, and authentication.
+- **PostgreSQL**: A powerful, open-source object-relational database system known for advanced querying capabilities, performance optimization, and reliability for handling complex and high-volume data.
 
 ---
 
@@ -73,6 +85,6 @@ This system was developed as part of a **university-based project** aimed at bui
 
 ### 🔗 Connect with Me
 
-- GitHub: [your-github-link](https://github.com/your-username)
-- LinkedIn: [your-linkedin-link](https://linkedin.com/in/your-linkedin)
+- GitHub: [your-github-link](https://github.com/Zeeshan6948)
+- LinkedIn: [your-linkedin-link](https://linkedin.com/in/mirzazeeshanahmed/)
 

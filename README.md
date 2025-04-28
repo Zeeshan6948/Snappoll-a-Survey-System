@@ -1,115 +1,113 @@
 # Snappoll-a-Survey-System
-A cross-platform survey application built with Flutter (Dart) for mobile and web.
+# Survey System (Flutter & Dart)
+
+A **cross-platform survey application** built with **Flutter (Dart)** for **mobile** and **web**.  
 This system enables users to create and manage surveys, share them via QR codes, and collect responses easily across different platforms.
 
-🚀 Features
-Create Leads and Manage Access
+---
 
-QR Code Sharing for Surveys
+## 🚀 Features
 
-Survey Templates Creation
+- **Create Leads** and **Manage Access**
+- **QR Code Sharing** for Surveys
+- **Survey Templates Creation**
+- **Multiple Question Types**:
+  - Single Choice
+  - Multiple Choice
+  - Rating
+  - Multi Rating
+  - Yes/No
+  - Open Text Input
+- **Mobile and Web Compatible**
+- **Supabase** (PostgreSQL) as Mobile Backend
+- **Web Frontend** (work in progress)
+- **Backend** built with **Python Django** and **PostgreSQL**
 
-Multiple Question Types:
+---
 
-Single Choice
+## 📱 Screenshots
 
-Multiple Choice
+> *(Add your screenshots here to show the flow!)*
 
-Rating
+| Feature | Screenshot |
+| :--- | :--- |
+| Home Page | ![Home](screenshots/home.png) |
+| Create Survey | ![Create Survey](screenshots/create_survey.png) |
+| QR Code Sharing | ![QR Code](screenshots/qr_code.png) |
+| Answering Survey | ![Answer Survey](screenshots/answer_survey.png) |
+| Survey Results | ![Survey Results](screenshots/survey_results.png) |
 
-Multi Rating
+> **Tip:** Place your screenshots inside a `screenshots/` folder in your repository.
 
-Yes/No
+---
 
-Open Text Input
+## 🛠️ Technologies Used
 
-Mobile and Web Compatible
+- **Flutter (Dart)** – Frontend (Mobile & Web)
+- **Supabase** – Backend-as-a-Service (for Mobile)
+- **Python Django** – Backend for Web
+- **PostgreSQL** – Database
 
-Supabase (PostgreSQL) as Mobile Backend
+---
 
-Web Frontend (work in progress)
+## 🔧 Setup Instructions
 
-Backend built with Python Django and PostgreSQL
+### Prerequisites
+- Flutter installed (latest stable)
+- Supabase project set up
+- Django backend (optional for web)
 
-📱 Screenshots
-(Add your screenshots here to show the flow! I'll show you where to place them.)
+### Running the App
 
+1. **Clone the repo**:
+   ```bash
+   git clone https://github.com/your-username/your-repo-name.git
+   cd your-repo-name
+   ```
 
-Feature	Screenshot
-Home Page	
-Create Survey	
-QR Code Sharing	
-Answering Survey	
-Survey Results	
-Tip: Place your screenshots inside a screenshots/ folder in your repository.
+2. **Install dependencies**:
+   ```bash
+   flutter pub get
+   ```
 
-🛠️ Technologies Used
-Flutter (Dart) – Frontend (Mobile & Web)
+3. **Run for mobile**:
+   ```bash
+   flutter run
+   ```
 
-Supabase – Backend-as-a-Service (for Mobile)
+4. **Run for web**:
+   ```bash
+   flutter run -d chrome
+   ```
 
-Python Django – Backend for Web
+---
 
-PostgreSQL – Database
+## 📋 Future Plans
 
-🔧 Setup Instructions
-Prerequisites
-Flutter installed (latest stable)
+- Complete Web Admin Panel
+- Add User Authentication
+- Add Analytics for Survey Responses
+- Multi-language Support
 
-Supabase project set up
+---
 
-Django backend (optional for web)
+## 📄 License
 
-Running the App
-Clone the repo:
+This project is licensed under the MIT License.  
+See the [LICENSE](LICENSE) file for details.
 
-bash
-Copy
-Edit
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
-Install dependencies:
+---
 
-bash
-Copy
-Edit
-flutter pub get
-Run for mobile:
+## 🙌 Acknowledgements
 
-bash
-Copy
-Edit
-flutter run
-Run for web:
+- [Flutter](https://flutter.dev/)
+- [Supabase](https://supabase.io/)
+- [Django](https://www.djangoproject.com/)
+- [PostgreSQL](https://www.postgresql.org/)
 
-bash
-Copy
-Edit
-flutter run -d chrome
-📋 Future Plans
-Complete Web Admin Panel
+---
 
-Add User Authentication
+### 🔗 Connect with Me
 
-Add Analytics for Survey Responses
-
-Multi-language Support
-
-📄 License
-This project is licensed under the MIT License.
-See the LICENSE file for details.
-
-🙌 Acknowledgements
-Flutter
-
-Supabase
-
-Django
-
-PostgreSQL
-
-🔗 Connect with Me
-GitHub: your-github-link
-
-LinkedIn: your-linkedin-link
-
+- GitHub: [your-github-link](https://github.com/your-username)
+- LinkedIn: [your-linkedin-link](https://linkedin.com/in/your-linkedin)

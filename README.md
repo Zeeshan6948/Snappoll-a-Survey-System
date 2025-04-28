@@ -2,26 +2,29 @@
 # Survey System (Flutter & Dart)
 
 A **cross-platform survey application** built with **Flutter (Dart)** for **mobile** and **web**.  
-This system enables users to create and manage surveys, share them via QR codes, and collect responses easily across different platforms.
+This system was developed as part of a **university-based project** aimed at building a full-fledged survey solution for academic and commercial use. It enables users to create and manage surveys, share them via QR codes, collect and analyze responses, and manage access rights seamlessly across different platforms.
 
 ---
 
 ## 🚀 Features
 
-- **Create Leads** and **Manage Access**
-- **QR Code Sharing** for Surveys
-- **Survey Templates Creation**
+- **Create Leads and Manage Access**: Organize and control survey access among different users and teams.
+- **QR Code Sharing for Surveys**: Instantly generate and share QR codes for quick survey access.
+- **Survey Templates Creation**: Design and reuse custom templates to speed up survey creation.
 - **Multiple Question Types**:
-  - Single Choice
-  - Multiple Choice
-  - Rating
-  - Multi Rating
-  - Yes/No
-  - Open Text Input
-- **Mobile and Web Compatible**
-- **Supabase** (PostgreSQL) as Mobile Backend
-- **Web Frontend** (work in progress)
-- **Backend** built with **Python Django** and **PostgreSQL**
+  - **Single Choice**: Select one option from a list.
+  - **Multiple Choice**: Choose multiple answers.
+  - **Rating**: Rate items on a numeric scale.
+  - **Multi Rating**: Rate multiple aspects simultaneously.
+  - **Yes/No**: Simple binary choice.
+  - **Open Text Input**: Free-form text responses.
+- **User Authentication**: Secure login and registration system to protect data and personalize user experience.
+- **Multi-language Support**: Currently supporting **German** in addition to English.
+- **Mobile and Web Compatible**: Designed for seamless use across smartphones, tablets, and web browsers.
+- **Backend Connectivity**:
+  - **Supabase** for mobile backend.
+  - **Django (Python) backend** for web frontend (under active development).
+- **PostgreSQL** as the main database engine.
 
 ---
 
@@ -43,58 +46,19 @@ This system enables users to create and manage surveys, share them via QR codes,
 
 ## 🛠️ Technologies Used
 
-- **Flutter (Dart)** – Frontend (Mobile & Web)
-- **Supabase** – Backend-as-a-Service (for Mobile)
-- **Python Django** – Backend for Web
-- **PostgreSQL** – Database
-
----
-
-## 🔧 Setup Instructions
-
-### Prerequisites
-- Flutter installed (latest stable)
-- Supabase project set up
-- Django backend (optional for web)
-
-### Running the App
-
-1. **Clone the repo**:
-   ```bash
-   git clone https://github.com/your-username/your-repo-name.git
-   cd your-repo-name
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   flutter pub get
-   ```
-
-3. **Run for mobile**:
-   ```bash
-   flutter run
-   ```
-
-4. **Run for web**:
-   ```bash
-   flutter run -d chrome
-   ```
+- **Flutter (Dart)**: Google's UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.
+- **Supabase**: An open-source Firebase alternative, providing authentication, real-time databases, storage, and auto-generated APIs.
+- **Python Django**: A high-level Python web framework that encourages rapid development and clean, pragmatic design.
+- **PostgreSQL**: A powerful, open-source object-relational database system known for reliability, feature robustness, and performance.
 
 ---
 
 ## 📋 Future Plans
 
-- Complete Web Admin Panel
-- Add User Authentication
-- Add Analytics for Survey Responses
-- Multi-language Support
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.  
-See the [LICENSE](LICENSE) file for details.
+- Complete backend implementation using **Python Django** with **PostgreSQL**.
+- Enhance Web Admin Panel for more advanced survey analytics.
+- Introduce real-time notifications and updates for survey results.
+- Expand multi-language support to additional languages beyond German.
 
 ---
 
@@ -111,3 +75,4 @@ See the [LICENSE](LICENSE) file for details.
 
 - GitHub: [your-github-link](https://github.com/your-username)
 - LinkedIn: [your-linkedin-link](https://linkedin.com/in/your-linkedin)
+

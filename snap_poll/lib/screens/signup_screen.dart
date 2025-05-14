@@ -1,12 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
-//import 'package:firebase_signin/reusable_widgets/reusable_widget.dart';
-//import 'package:firebase_signin/screens/home_screen.dart';
-//import 'package:firebase_signin/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:snap_poll/global/global_widgets.dart';
 import 'package:snap_poll/screens/main_page.dart';
 import 'package:snap_poll/screens/terms_and_conditions.dart';
-
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../global/colors.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -92,29 +89,46 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   height: 20,
                 ),
                 consentForm(context),
-                GlobalWidgets().firebaseUIButton(context, "Sign Up", () {
+                GlobalWidgets().firebaseUIButton(context, "Sign Up", () async {
                   if (isChecked) {
-                    FirebaseAuth.instance
-                        .createUserWithEmailAndPassword(
-                            email: _emailTextController.text,
-                            password: _passwordTextController.text)
-                        .then((value) {
-                      print("Created New Account");
-                      Navigator.push(
+                    final supabase = Supabase.instance.client;
+
+                    try {
+                      final response = await supabase.auth.signUp(
+                        email: _emailTextController.text,
+                        password: _passwordTextController.text,
+                      );
+
+                      if (response.user != null) {
+                        print("Created New Account");
+
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const MainPage()));
-                    }).onError((error, stackTrace) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        duration: Duration(seconds: 3),
-                        content: Text(
-                            'The email address is already in use by another account'),
-                      ));
-                      //print("Error ${error.toString()}");
-                    });
+                              builder: (context) => const MainPage()),
+                        );
+                      } else {
+                        // user is null? probably needs email verification
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            duration: Duration(seconds: 3),
+                            content: Text('Please verify your email address.'),
+                          ),
+                        );
+                      }
+                    } catch (error) {
+                      // Catch any signup error here
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          duration: const Duration(seconds: 3),
+                          content: Text(error.toString()),
+                        ),
+                      );
+                    }
                   } else {
                     GlobalWidgets.showToast(
-                        'Please accept the consent form to continue');
+                      'Please accept the consent form to continue',
+                    );
                   }
                 })
               ],

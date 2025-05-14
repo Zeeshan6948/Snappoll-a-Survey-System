@@ -1,8 +1,8 @@
 # Snappoll-a-Survey-System
-# Survey System (Flutter & Dart)
+## Survey System (Flutter & Dart)
 
 A **cross-platform survey application** built with **Flutter (Dart)** for **mobile** and **web**.  
-This system was developed as part of a **university-based project** aimed at building a full-fledged survey solution for academic and commercial use. It enables users to create and manage surveys, share them via QR codes, collect and analyze responses, and manage access rights seamlessly across different platforms.
+This system was developed as part of a **university-based project** at **Otto-Friedrich-University Bamberg**, aimed at building a full-fledged survey solution for academic and commercial use. It enables users to create and manage surveys, share them via QR codes, collect and analyze responses, and manage access rights seamlessly across different platforms.
 
 The project is designed to be versatile and scalable, making it a perfect tool for academic institutions, businesses, and individuals who need to conduct surveys efficiently. It can be used for market research, academic research, feedback collection, event planning, and customer satisfaction surveys. The easy-to-use interface ensures that users with little technical knowledge can create and distribute surveys. With mobile and web compatibility, participants can conveniently complete surveys on any device. The platform ensures data security and anonymity, making it ideal for sensitive surveys. Future updates aim to enhance real-time analytics and support additional languages. Overall, this project is a robust, ready-to-deploy survey management system.
 
@@ -45,9 +45,8 @@ The project is designed to be versatile and scalable, making it a perfect tool f
 | Create Survey | ![Create Survey](screenshots/create_survey.jpg) |
 | QR Code Sharing | ![QR Code](screenshots/qr_code.jpg) |
 | Answering Survey | ![Answer Survey](screenshots/answer_survey.jpg) |
-| Survey Results | ![Survey Results](screenshots/survey_results.jpg) |
-| Single Choice Question | ![Single Choice](SingleChoice/home.jpg) |
-| Questions Available | ![Questions Available](screenshots/Questions.jpg) |
+| Single Choice Question | ![Single Choice](screenshots/SingleChoice.jpg) |
+| Questions Available | ![Questions Available](screenshots/Questions.jpg) | 
 | Manage Surveys | ![Manage Surveys](screenshots/Manage_Surveys.jpg) |
 | Survey Access Control | ![Survey Access](screenshots/Survey_Access.jpg) |
 | Survey Completed | ![Survey Completed](screenshots/Survey_Completed.jpg) |
@@ -73,6 +72,43 @@ The project is designed to be versatile and scalable, making it a perfect tool f
 - Expand multi-language support to additional languages beyond German.
 
 ---
+
+## 🛠️ Setup and Initialization Guide
+
+If you're setting up this project for the first time, follow these steps:
+
+1. **Clone the Repository**:
+
+git clone https://github.com/your-username/Snappoll-a-Survey-System.git
+cd Snappoll-a-Survey-System
+
+2. **Install Dependencies**:
+Ensure you have **Flutter** installed. Then, run the following command to install the necessary dependencies:
+flutter pub get
+
+3. **Set up Supabase**:
+- Go to the [Supabase website](https://supabase.io/) and create an account if you haven't already.
+- Create a new project in the Supabase dashboard.
+- In the project, navigate to the **Settings** > **API** section and copy the **API URL** and **API Key**.
+- Create a file called `abc.dart` in the `lib` folder of your project and add your Supabase credentials there:
+
+```dart
+const String supabaseUrl = 'YOUR_SUPABASE_URL';
+const String supabaseKey = 'YOUR_SUPABASE_KEY';
+
+4. **Initialize Supabase in your Flutter app**:
+In your main Dart file (main.dart), initialize Supabase with the credentials you added in the abc.dart file:
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'abc.dart'; // Import the file with your credentials
+
+void main() async {
+  await Supabase.initialize(
+    url: supabaseUrl,
+    anonKey: supabaseKey,
+  );
+  runApp(MyApp());
+}
+
 
 ## 🙌 Acknowledgements
 

@@ -1,22 +1,19 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snap_poll/global/colors.dart';
-import 'package:flutter/services.dart';
 import 'package:snap_poll/global/global_variables.dart';
 import 'package:snap_poll/global/global_widgets.dart';
 import 'package:snap_poll/global/size_config.dart';
 import 'package:snap_poll/routes/app_pages.dart';
-import 'package:snap_poll/screens/initial_qr_or_signin.dart';
 import 'package:snap_poll/screens/main_page.dart';
 import 'package:snap_poll/screens/reset_password.dart';
 import 'package:snap_poll/screens/signup_screen.dart';
-import 'package:snap_poll/global/global_variables.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart' hide AssetManifest;
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -29,32 +26,57 @@ class _SignInScreenState extends State<SignInScreen> {
   GlobalWidgets globalWidgets = GlobalWidgets();
   final TextEditingController _passwordTextController = TextEditingController();
   final TextEditingController _emailTextController = TextEditingController();
-  late StreamSubscription<User?> user;
+  late StreamSubscription<AuthState> _authSubscription;
+
+  @override
   void initState() {
     super.initState();
-    FirebaseAuth.instance.currentUser;
-    user = FirebaseAuth.instance.authStateChanges().listen((user) {
-      if (user == null) {
-        print('User is currently signed out!');
-      } else {
-        final User? user2 = FirebaseAuth.instance.currentUser;
-        final uid = user2?.uid;
-        GlobalVariables.my_ID = uid!.toString();
-        print('User is signed in!');
-        GlobalVariables.userId = uid;
-        print(uid);
+    checkAuthState();
+  }
 
-        print(GlobalVariables.userId);
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => const MainPage()));
-        return;
+  void checkAuthState() async {
+    final supabase = Supabase.instance.client;
+    final session = supabase.auth.currentSession;
+
+    if (session != null) {
+      final user = session.user;
+      final uid = user.id;
+      GlobalVariables.my_ID = uid;
+      GlobalVariables.userId = uid;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainPage()),
+        );
+      });
+    }
+
+    _authSubscription = supabase.auth.onAuthStateChange.listen((data) {
+      final event = data.event;
+      final session = data.session;
+
+      if (event == AuthChangeEvent.signedIn && session != null) {
+        final user = session.user;
+        final uid = user.id;
+        GlobalVariables.my_ID = uid;
+        GlobalVariables.userId = uid;
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MainPage()),
+          );
+        });
+      } else if (event == AuthChangeEvent.signedOut) {
+        debugPrint('User signed out.');
       }
     });
   }
 
   @override
   void dispose() {
-    user.cancel();
+    _authSubscription.cancel();
     super.dispose();
   }
 
@@ -73,10 +95,6 @@ class _SignInScreenState extends State<SignInScreen> {
             "Sign In".tr,
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
           ),
-          // leading: IconButton(
-          //   icon: Icon(Icons.menu_rounded, color: ColorsX.white,),
-          //   onPressed: () => _scaffoldKey.currentState?.openDrawer(), //Scaffold.of(context).openDrawer(),
-          // ),
           actions: [
             TextButton(
               onPressed: () {
@@ -123,45 +141,40 @@ class _SignInScreenState extends State<SignInScreen> {
                 width: 150,
                 fit: BoxFit.contain,
               ),
-              const SizedBox(
-                height: 55,
-              ),
+              const SizedBox(height: 55),
               animatedTextLogo(),
-              const SizedBox(
-                height: 55,
-              ),
+              const SizedBox(height: 55),
               GlobalWidgets().reusableTextField("Enter UserName".tr,
                   Icons.person_outline, false, _emailTextController),
-              const SizedBox(
-                height: 20,
-              ),
+              const SizedBox(height: 20),
               GlobalWidgets().reusableTextField("Enter Password".tr,
                   Icons.lock_outline, true, _passwordTextController),
-              const SizedBox(
-                height: 5,
-              ),
-              GlobalWidgets().firebaseUIButton(context, "Sign In".tr, () {
+              const SizedBox(height: 5),
+              GlobalWidgets().firebaseUIButton(context, "Sign In".tr, () async {
                 GlobalVariables.MY_EMAIL_ADDRESS = _emailTextController.text;
                 saveInLocal();
-                FirebaseAuth.instance
-                    .signInWithEmailAndPassword(
-                        email: _emailTextController.text,
-                        password: _passwordTextController.text)
-                    .then((value) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const MainPage()));
-                }).onError((error, stackTrace) {
+
+                try {
+                  final response =
+                      await Supabase.instance.client.auth.signInWithPassword(
+                    email: _emailTextController.text,
+                    password: _passwordTextController.text,
+                  );
+
+                  if (response.user != null) {
+                    // Auth state listener will handle the redirection.
+                  } else {
+                    throw Exception('Login failed');
+                  }
+                } catch (error) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     duration: Duration(seconds: 3),
                     content: Text('Invalid Username or Password'),
                   ));
-                  //print("Error ${error.toString()}");
-                });
+                }
               }),
               signUpOption(context),
-              forgetPassword(context)
+              forgetPassword(context),
             ],
           ),
         ),
@@ -170,11 +183,6 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   animatedTextLogo() {
-    const colorizeTextStyle = TextStyle(
-      fontSize: 32.0,
-      fontWeight: FontWeight.w700,
-      fontFamily: 'Horizon',
-    ); //not used
     return Align(
       alignment: Alignment.center,
       child: SizedBox(
@@ -183,18 +191,17 @@ class _SignInScreenState extends State<SignInScreen> {
             ColorizeAnimatedText(
               'SnapPoll',
               textStyle: GoogleFonts.raleway(
-                  textStyle: const TextStyle(
-                      color: ColorsX.appBarColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 32)),
+                textStyle: const TextStyle(
+                    color: ColorsX.appBarColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 32),
+              ),
               colors: colorizeColors,
             ),
           ],
           isRepeatingAnimation: false,
           repeatForever: true,
-          onTap: () {
-            debugPrint("Tap Event");
-          },
+          onTap: () => debugPrint("Tap Event"),
         ),
       ),
     );
@@ -235,7 +242,7 @@ Widget forgetPassword(BuildContext context) {
     child: TextButton(
       child: Text(
         "Forgot Password?".tr,
-        style: TextStyle(color: Colors.black87),
+        style: const TextStyle(color: Colors.black87),
         textAlign: TextAlign.right,
       ),
       onPressed: () => Navigator.push(context,

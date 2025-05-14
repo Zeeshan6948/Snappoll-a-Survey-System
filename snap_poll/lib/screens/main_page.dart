@@ -10,6 +10,7 @@ import 'package:snap_poll/global/size_config.dart';
 import 'package:snap_poll/routes/app_pages.dart';
 import 'package:snap_poll/screens/initial_qr_or_signin.dart';
 import 'package:snap_poll/screens/sign_in_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../global/colors.dart';
 import '../global/global_widgets.dart';
@@ -76,11 +77,14 @@ class _MainPageState extends State<MainPage> {
                     ColorsX.white, 0, 0, 0, 0, FontWeight.w700, 16),
               ),
               MaterialButton(
-                  onPressed: () {
-                    FirebaseAuth.instance.signOut().then((value) {
-                      print("Signed Out");
-                      Get.toNamed(Routes.MAIN_PAGE);
-                    });
+                  onPressed: () async {
+                    final supabase = Supabase.instance.client;
+
+                    await supabase.auth.signOut();
+
+                    print("Signed Out");
+
+                    Get.toNamed(Routes.MAIN_PAGE);
                   },
                   minWidth: 20,
                   color: ColorsX.appBarColor,

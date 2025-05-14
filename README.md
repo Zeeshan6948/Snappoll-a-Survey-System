@@ -90,17 +90,17 @@ flutter pub get
 - Go to the [Supabase website](https://supabase.io/) and create an account if you haven't already.
 - Create a new project in the Supabase dashboard.
 - In the project, navigate to the **Settings** > **API** section and copy the **API URL** and **API Key**.
-- Create a file called `abc.dart` in the `lib` folder of your project and add your Supabase credentials there:
+- Create a file called `main.dart` in the `lib` folder of your project and add your Supabase credentials there:
 
 ```dart
 const String supabaseUrl = 'YOUR_SUPABASE_URL';
 const String supabaseKey = 'YOUR_SUPABASE_KEY';
-
+```
 4. **Initialize Supabase in your Flutter app**:
-In your main Dart file (main.dart), initialize Supabase with the credentials you added in the abc.dart file:
+In your main Dart file (main.dart), initialize Supabase with the credentials you added in the main.dart file:
+```dart
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'abc.dart'; // Import the file with your credentials
-
+import 'main.dart'; // Import the file with your credentials
 void main() async {
   await Supabase.initialize(
     url: supabaseUrl,
@@ -108,8 +108,16 @@ void main() async {
   );
   runApp(MyApp());
 }
-
-
+```
+5. **Running the Project:**:
+  - **For Web:**:
+    ```dart
+    flutter run -d chrome
+    ```
+  - **For Mobile (iOS/Android):**:
+    ```dart
+    flutter run
+    ```
 ## 🙌 Acknowledgements
 
 - [Flutter](https://flutter.dev/)

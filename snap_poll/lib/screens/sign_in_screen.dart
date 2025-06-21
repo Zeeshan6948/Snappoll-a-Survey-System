@@ -52,26 +52,26 @@ class _SignInScreenState extends State<SignInScreen> {
       });
     }
 
-    _authSubscription = supabase.auth.onAuthStateChange.listen((data) {
-      final event = data.event;
-      final session = data.session;
+    // _authSubscription = supabase.auth.onAuthStateChange.listen((data) {
+    //   final event = data.event;
+    //   final session = data.session;
 
-      if (event == AuthChangeEvent.signedIn && session != null) {
-        final user = session.user;
-        final uid = user.id;
-        GlobalVariables.my_ID = uid;
-        GlobalVariables.userId = uid;
+    //   if (event == AuthChangeEvent.signedIn && session != null) {
+    //     final user = session.user;
+    //     final uid = user.id;
+    //     GlobalVariables.my_ID = uid;
+    //     GlobalVariables.userId = uid;
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const MainPage()),
-          );
-        });
-      } else if (event == AuthChangeEvent.signedOut) {
-        debugPrint('User signed out.');
-      }
-    });
+    //     WidgetsBinding.instance.addPostFrameCallback((_) {
+    //       Navigator.pushReplacement(
+    //         context,
+    //         MaterialPageRoute(builder: (context) => const MainPage()),
+    //       );
+    //     });
+    //   } else if (event == AuthChangeEvent.signedOut) {
+    //     debugPrint('User signed out.');
+    //   }
+    // });
   }
 
   @override
@@ -151,26 +151,32 @@ class _SignInScreenState extends State<SignInScreen> {
                   Icons.lock_outline, true, _passwordTextController),
               const SizedBox(height: 5),
               GlobalWidgets().firebaseUIButton(context, "Sign In".tr, () async {
-                GlobalVariables.MY_EMAIL_ADDRESS = _emailTextController.text;
-                saveInLocal();
-
                 try {
+                  GlobalVariables.MY_EMAIL_ADDRESS = _emailTextController.text;
+                  saveInLocal();
+
                   final response =
                       await Supabase.instance.client.auth.signInWithPassword(
                     email: _emailTextController.text,
                     password: _passwordTextController.text,
                   );
 
-                  if (response.user != null) {
-                    // Auth state listener will handle the redirection.
+                  final user = response.user;
+                  final session = response.session;
+
+                  if (user != null && session != null) {
+                    GlobalVariables.my_ID = user.id;
+                    GlobalVariables.userId = user.id;
+
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainPage()),
+                    );
                   } else {
-                    throw Exception('Login failed');
+                    _showError();
                   }
-                } catch (error) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    duration: Duration(seconds: 3),
-                    content: Text('Invalid Username or Password'),
-                  ));
+                } catch (e) {
+                  _showError();
                 }
               }),
               signUpOption(context),
@@ -178,6 +184,15 @@ class _SignInScreenState extends State<SignInScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showError() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Invalid Username or Password"),
+        duration: Duration(seconds: 3),
       ),
     );
   }

@@ -10,6 +10,7 @@ import 'package:snap_poll/screens/card_form/card_form.dart';
 import 'package:snap_poll/widget/drawer_widget.dart';
 import 'package:snap_poll/widget/single_choice.dart';
 import 'package:snap_poll/screens/form_layout_option.dart' as fll;
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../global/colors.dart';
 import '../global/size_config.dart';
 import '../widget/yes_no.dart';
@@ -32,7 +33,7 @@ class _ChooseAccessState extends State<ChooseAccess> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback(
-            (_) => checkForAlreadySurvey(GlobalVariables.Fetched_Document));
+        (_) => checkForAlreadySurvey(GlobalVariables.Fetched_Document));
   }
 
   @override
@@ -90,8 +91,18 @@ class _ChooseAccessState extends State<ChooseAccess> {
       appBar: AppBar(
           backgroundColor: ColorsX.appBarColor,
           centerTitle: true,
-          title: globalWidgets.myText(context, ''
-              'Assign Roles'.tr, ColorsX.white, 0, 0, 0, 0, FontWeight.w500, 18),
+          title: globalWidgets.myText(
+              context,
+              ''
+                      'Assign Roles'
+                  .tr,
+              ColorsX.white,
+              0,
+              0,
+              0,
+              0,
+              FontWeight.w500,
+              18),
           actions: [
             Visibility(
               visible: true,
@@ -112,15 +123,15 @@ class _ChooseAccessState extends State<ChooseAccess> {
               size: 18,
             ),
           )
-        // leading: IconButton(
-        //   icon: Icon(
-        //     Icons.menu_rounded,
-        //     color: ColorsX.white,
-        //   ),
-        //   onPressed: () => _scaffoldKey.currentState
-        //       ?.openDrawer(), //Scaffold.of(context).openDrawer(),
-        // ),
-      ),
+          // leading: IconButton(
+          //   icon: Icon(
+          //     Icons.menu_rounded,
+          //     color: ColorsX.white,
+          //   ),
+          //   onPressed: () => _scaffoldKey.currentState
+          //       ?.openDrawer(), //Scaffold.of(context).openDrawer(),
+          // ),
+          ),
     );
   }
 
@@ -176,143 +187,220 @@ class _ChooseAccessState extends State<ChooseAccess> {
 
   body(BuildContext context) {
     return Container(
-      width: SizeConfig.screenWidth,
-      height: SizeConfig.screenHeight,
-      decoration: const BoxDecoration(color: ColorsX.white),
-      child: ListView(
-        scrollDirection: Axis.vertical,
-        children: <Widget>[
-
-          globalWidgets.myText(context, 'Who can have the access to this survey?'.tr,
-              ColorsX.black, 10, 10, 10, 0, FontWeight.w400, 16),
-          Container(
-            // height: SizeConfig.screenHeight * .25,
-            child: Card(
-                shadowColor: ColorsX.blackWithOpacity,
-                clipBehavior: Clip.hardEdge,
-                elevation: 1,
-                child: Padding(
-                    padding: EdgeInsets.only(
-                        left: 10,
-                        top: SizeConfig.screenHeight * .01,
-                        right: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        globalWidgets.myText(context, 'Choose Maintainer'.tr,
-                            ColorsX.myblack, 10, 10, 10, 0, FontWeight.w700, 18),
-                        globalWidgets.myText(context, 'A maintainer can view and edit your survey before it is being published.'.tr,
-                            ColorsX.subBlack, 5, 10, 10, 10, FontWeight.w400, 16),
-                        globalWidgets.myTextField(TextInputType.emailAddress, maintainerCtl, false, 'Email address'),
-                        addMaintainerButton(context),
-                        SizedBox(height: 10,),
-                        Visibility(
-                          visible: GlobalVariables.MAINTAINER_LIST.isEmpty ? false : true,
-                          child: Wrap(
-                            spacing: 2.0, // gap between adjacent chips
-                            // runSpacing: 1.0, // gap between lines
-                            children: <Widget>[
-                              for (int index = 0 ; index < GlobalVariables.MAINTAINER_LIST.length; index++)
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: GestureDetector(
-                                    onTap: (){
-                                      removeMaintainer(index);
-                                    },
-                                    child: Chip(
-                                      avatar: CircleAvatar(backgroundColor: ColorsX.appBarColor,
-                                          child: Icon(Icons.clear, color: ColorsX.white,)),
-                                      label: globalWidgets.myText(context,
-                                          GlobalVariables.MAINTAINER_LIST[index],
-                                          ColorsX.subBlack, 0, 0, 0, 0, FontWeight.w400, 16),
+        width: SizeConfig.screenWidth,
+        height: SizeConfig.screenHeight,
+        decoration: const BoxDecoration(color: ColorsX.white),
+        child: ListView(
+          scrollDirection: Axis.vertical,
+          children: <Widget>[
+            globalWidgets.myText(
+                context,
+                'Who can have the access to this survey?'.tr,
+                ColorsX.black,
+                10,
+                10,
+                10,
+                0,
+                FontWeight.w400,
+                16),
+            Container(
+              // height: SizeConfig.screenHeight * .25,
+              child: Card(
+                  shadowColor: ColorsX.blackWithOpacity,
+                  clipBehavior: Clip.hardEdge,
+                  elevation: 1,
+                  child: Padding(
+                      padding: EdgeInsets.only(
+                          left: 10,
+                          top: SizeConfig.screenHeight * .01,
+                          right: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          globalWidgets.myText(
+                              context,
+                              'Choose Maintainer'.tr,
+                              ColorsX.myblack,
+                              10,
+                              10,
+                              10,
+                              0,
+                              FontWeight.w700,
+                              18),
+                          globalWidgets.myText(
+                              context,
+                              'A maintainer can view and edit your survey before it is being published.'
+                                  .tr,
+                              ColorsX.subBlack,
+                              5,
+                              10,
+                              10,
+                              10,
+                              FontWeight.w400,
+                              16),
+                          globalWidgets.myTextField(TextInputType.emailAddress,
+                              maintainerCtl, false, 'Email address'),
+                          addMaintainerButton(context),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Visibility(
+                            visible: GlobalVariables.MAINTAINER_LIST.isEmpty
+                                ? false
+                                : true,
+                            child: Wrap(
+                              spacing: 2.0, // gap between adjacent chips
+                              // runSpacing: 1.0, // gap between lines
+                              children: <Widget>[
+                                for (int index = 0;
+                                    index <
+                                        GlobalVariables.MAINTAINER_LIST.length;
+                                    index++)
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        removeMaintainer(index);
+                                      },
+                                      child: Chip(
+                                        avatar: CircleAvatar(
+                                            backgroundColor:
+                                                ColorsX.appBarColor,
+                                            child: Icon(
+                                              Icons.clear,
+                                              color: ColorsX.white,
+                                            )),
+                                        label: globalWidgets.myText(
+                                            context,
+                                            GlobalVariables
+                                                .MAINTAINER_LIST[index],
+                                            ColorsX.subBlack,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            FontWeight.w400,
+                                            16),
+                                      ),
                                     ),
                                   ),
-                                ),
-                            ],
+                              ],
+                            ),
+                          )
+                        ],
+                      ))),
+            ),
+            Container(
+              // height: SizeConfig.screenHeight * .25,
+              child: Card(
+                  shadowColor: ColorsX.blackWithOpacity,
+                  clipBehavior: Clip.hardEdge,
+                  elevation: 1,
+                  child: Padding(
+                      padding: EdgeInsets.only(
+                          left: 10,
+                          top: SizeConfig.screenHeight * .01,
+                          right: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          globalWidgets.myText(
+                              context,
+                              'Choose Viewer'.tr,
+                              ColorsX.myblack,
+                              10,
+                              10,
+                              10,
+                              0,
+                              FontWeight.w700,
+                              18),
+                          globalWidgets.myText(
+                              context,
+                              'A viewer can view your survey but cannot edit it before it is being published.'
+                                  .tr,
+                              ColorsX.subBlack,
+                              5,
+                              10,
+                              10,
+                              10,
+                              FontWeight.w400,
+                              16),
+                          globalWidgets.myTextField(TextInputType.emailAddress,
+                              viewerCtl, false, 'Email address'),
+                          addViewerButton(context),
+                          SizedBox(
+                            height: 10,
                           ),
-                        )
-                      ],
-                    ))),
-          ),
-          Container(
-            // height: SizeConfig.screenHeight * .25,
-            child: Card(
-                shadowColor: ColorsX.blackWithOpacity,
-                clipBehavior: Clip.hardEdge,
-                elevation: 1,
-                child: Padding(
-                    padding: EdgeInsets.only(
-                        left: 10,
-                        top: SizeConfig.screenHeight * .01,
-                        right: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        globalWidgets.myText(context, 'Choose Viewer'.tr,
-                            ColorsX.myblack, 10, 10, 10, 0, FontWeight.w700, 18),
-                        globalWidgets.myText(context, 'A viewer can view your survey but cannot edit it before it is being published.'.tr,
-                            ColorsX.subBlack, 5, 10, 10, 10, FontWeight.w400, 16),
-                        globalWidgets.myTextField(TextInputType.emailAddress, viewerCtl, false, 'Email address'),
-                        addViewerButton(context),
-                        SizedBox(height: 10,),
-                        Visibility(
-                          visible: GlobalVariables.VIEWER_LIST.isEmpty ? false : true,
-                          child: Wrap(
-                            spacing: 2.0, // gap between adjacent chips
-                            // runSpacing: 1.0, // gap between lines
-                            children: <Widget>[
-                              for (int index = 0 ; index < GlobalVariables.VIEWER_LIST.length; index++)
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: GestureDetector(
-                                    onTap: (){
-                                      removeViewer(index);
-                                    },
-                                    child: Chip(
-                                      avatar: CircleAvatar(backgroundColor: ColorsX.appBarColor,
-                                          child: Icon(Icons.clear, color: ColorsX.white,)),
-                                      label: globalWidgets.myText(context,
-                                          GlobalVariables.VIEWER_LIST[index],
-                                          ColorsX.subBlack, 0, 0, 0, 0, FontWeight.w400, 16),
+                          Visibility(
+                            visible: GlobalVariables.VIEWER_LIST.isEmpty
+                                ? false
+                                : true,
+                            child: Wrap(
+                              spacing: 2.0, // gap between adjacent chips
+                              // runSpacing: 1.0, // gap between lines
+                              children: <Widget>[
+                                for (int index = 0;
+                                    index < GlobalVariables.VIEWER_LIST.length;
+                                    index++)
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        removeViewer(index);
+                                      },
+                                      child: Chip(
+                                        avatar: CircleAvatar(
+                                            backgroundColor:
+                                                ColorsX.appBarColor,
+                                            child: Icon(
+                                              Icons.clear,
+                                              color: ColorsX.white,
+                                            )),
+                                        label: globalWidgets.myText(
+                                            context,
+                                            GlobalVariables.VIEWER_LIST[index],
+                                            ColorsX.subBlack,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            FontWeight.w400,
+                                            16),
+                                      ),
                                     ),
                                   ),
-                                ),
-                            ],
-                          ),
-                        )
-                      ],
-                    ))),
-          ),
-        ],
-      )
-    );
+                              ],
+                            ),
+                          )
+                        ],
+                      ))),
+            ),
+          ],
+        ));
   }
 
   addMaintainerButton(BuildContext context) {
     return GestureDetector(
       onTap: () async {
         SharedPreferences preferences = await SharedPreferences.getInstance();
-        if(maintainerCtl.text.isEmpty){
+        if (maintainerCtl.text.isEmpty) {
           GlobalWidgets.showToast('Empty');
-        }
-        else{
+        } else {
           GlobalWidgets.hideKeyboard(context);
-          if(GlobalVariables.VIEWER_LIST.contains(maintainerCtl.text.trim())){
+          if (GlobalVariables.VIEWER_LIST.contains(maintainerCtl.text.trim())) {
             GlobalWidgets.showToast('Already added in viewer list'.tr);
-          }else{
-            if(GlobalVariables.MAINTAINER_LIST.isEmpty){
+          } else {
+            if (GlobalVariables.MAINTAINER_LIST.isEmpty) {
               setState(() {
                 GlobalVariables.MAINTAINER_LIST.add(maintainerCtl.text.trim());
               });
               maintainerCtl.clear();
-            }
-            else if(GlobalVariables.MAINTAINER_LIST.contains(maintainerCtl.text)){
+            } else if (GlobalVariables.MAINTAINER_LIST
+                .contains(maintainerCtl.text)) {
               GlobalWidgets.showToast('Already added'.tr);
-            }
-            else if(preferences.get('email') == maintainerCtl.text){
+            } else if (preferences.get('email') == maintainerCtl.text) {
               GlobalWidgets.showToast('You cannot be maintainer or viewer'.tr);
-            }
-            else{
+            } else {
               setState(() {
                 GlobalVariables.MAINTAINER_LIST.add(maintainerCtl.text.trim());
               });
@@ -339,32 +427,28 @@ class _ChooseAccessState extends State<ChooseAccess> {
       ),
     );
   }
+
   addViewerButton(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-
         SharedPreferences preferences = await SharedPreferences.getInstance();
-        if(viewerCtl.text.isEmpty){
+        if (viewerCtl.text.isEmpty) {
           GlobalWidgets.showToast('Empty');
-        }
-        else{
+        } else {
           GlobalWidgets.hideKeyboard(context);
-          if(GlobalVariables.MAINTAINER_LIST.contains(viewerCtl.text.trim())){
+          if (GlobalVariables.MAINTAINER_LIST.contains(viewerCtl.text.trim())) {
             GlobalWidgets.showToast('Already added in maintainer list'.tr);
-          }else{
-            if(GlobalVariables.VIEWER_LIST.isEmpty){
+          } else {
+            if (GlobalVariables.VIEWER_LIST.isEmpty) {
               setState(() {
                 GlobalVariables.VIEWER_LIST.add(viewerCtl.text.trim());
               });
               viewerCtl.clear();
-            }
-            else if(GlobalVariables.VIEWER_LIST.contains(viewerCtl.text)){
+            } else if (GlobalVariables.VIEWER_LIST.contains(viewerCtl.text)) {
               GlobalWidgets.showToast('Already added'.tr);
-            }
-            else if(preferences.get('email') == viewerCtl.text){
+            } else if (preferences.get('email') == viewerCtl.text) {
               GlobalWidgets.showToast('You cannot be maintainer or viewer'.tr);
-            }
-            else{
+            } else {
               setState(() {
                 GlobalVariables.VIEWER_LIST.add(viewerCtl.text.trim());
               });
@@ -393,23 +477,22 @@ class _ChooseAccessState extends State<ChooseAccess> {
   }
 
   submitForm(BuildContext context) {
+    final supabase = Supabase.instance.client;
     return Visibility(
-      visible: GlobalWidgets.pwdWidgets.length != 0,
+      visible: GlobalWidgets.pwdWidgets.isNotEmpty,
       child: GestureDetector(
         onTap: () async {
           debugPrint('submit tapped');
           GlobalWidgets.showProgressLoader('');
-          var collection = FirebaseFirestore.instance.collection('temp_surveys');
-          if (GlobalVariables.idOfSurvey != "") {
-            var documentId = GlobalVariables.idOfSurvey;
-            documentId=documentId.split('/')[1];
-            final DocumentReference _temp;
-            _temp = FirebaseFirestore.instance
-                .collection('temp_surveys')
-                .doc(documentId);
-            _temp.delete();
+
+          // Delete existing survey if editing
+          if (GlobalVariables.idOfSurvey.isNotEmpty) {
+            final documentId = GlobalVariables.idOfSurvey.split('/').last;
+            await supabase.from('temp_surveys').delete().eq('id', documentId);
           }
-          Map<String, dynamic> map = {
+
+          // Compose the full survey data as a JSON object
+          Map<String, dynamic> surveyJson = {
             'title': GlobalVariables.TITLE_OF_SURVEY,
             'short_description': GlobalVariables.descriptionCTLValue,
             'questions': GlobalVariables.LIST_OF_ALL_QUESTIONS,
@@ -418,40 +501,54 @@ class _ChooseAccessState extends State<ChooseAccess> {
             'maintainers': GlobalVariables.MAINTAINER_LIST,
             'viewers': GlobalVariables.VIEWER_LIST,
           };
-          var docRef = await collection.add(map);
-          var documentId = docRef.id;
+
+          // Insert into Supabase (auto-generates ID)
+          final response = await supabase
+              .from('temp_surveys')
+              .insert({'survey_data': surveyJson})
+              .select()
+              .single();
 
           GlobalWidgets.hideProgressLoader();
-          if (documentId.toString().isEmpty) {
+
+          if (response == null || response['id'] == null) {
             GlobalWidgets.showToast('Survey not saved. Try again'.tr);
           } else {
-            var resultsCollectionRef = FirebaseFirestore.instance
-                .collection('temp_surveys/$documentId/results');
-            await resultsCollectionRef
-                .doc('questionsID')
-                .set({'questions': GlobalVariables.LIST_OF_ALL_QUESTIONS});
-            GlobalVariables.idOfSurvey = "temp/"+documentId;
+            final newSurveyId = response['id'];
+            GlobalVariables.idOfSurvey = "temp/$newSurveyId";
+
+            // Clear global variables
             GlobalVariables.TITLE_OF_SURVEY = "";
-            GlobalWidgets.pwdWidgets.clear;
-            // shortDescriptionCtl.clear();
+            GlobalWidgets.pwdWidgets.clear();
             GlobalVariables.SECTIONS_LIST.clear();
             GlobalVariables.LIST_OF_ALL_QUESTIONS.clear();
+
             Get.toNamed(Routes.QRCODE_SCREEN);
           }
         },
         child: Container(
           height: 40,
-          margin: EdgeInsets.only(left: 20, right: 20, top: 0),
+          margin: const EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(20.0)),
+            borderRadius: BorderRadius.circular(20.0),
             color: ColorsX.white,
           ),
           child: Align(
             alignment: Alignment.center,
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 20),
-              child: globalWidgets.myTextRaleway(context, "Submit".tr,
-                  ColorsX.appBarColor, 0, 0, 0, 0, FontWeight.w600, 17),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 5.0, horizontal: 20),
+              child: globalWidgets.myTextRaleway(
+                context,
+                "Submit".tr,
+                ColorsX.appBarColor,
+                0,
+                0,
+                0,
+                0,
+                FontWeight.w600,
+                17,
+              ),
             ),
           ),
         ),
@@ -460,9 +557,9 @@ class _ChooseAccessState extends State<ChooseAccess> {
   }
 
   shortDescriptionDialog(
-      BuildContext context,
-      TextEditingController ctl,
-      ) {
+    BuildContext context,
+    TextEditingController ctl,
+  ) {
     ctl.clear();
     return AwesomeDialog(
         context: context,
@@ -507,11 +604,10 @@ class _ChooseAccessState extends State<ChooseAccess> {
       ..show();
   }
 
-
   createSectionDialog(
-      BuildContext context,
-      TextEditingController ctl,
-      ) {
+    BuildContext context,
+    TextEditingController ctl,
+  ) {
     ctl.clear();
     return AwesomeDialog(
         context: context,
@@ -560,9 +656,9 @@ class _ChooseAccessState extends State<ChooseAccess> {
   }
 
   dynamicScaleDialog(
-      BuildContext context,
-      TextEditingController ctl,
-      ) {
+    BuildContext context,
+    TextEditingController ctl,
+  ) {
     ctl.clear();
     return AwesomeDialog(
         context: context,
@@ -618,7 +714,6 @@ class _ChooseAccessState extends State<ChooseAccess> {
       ..show();
   }
 
-
   checkForAlreadySurvey(Map<String, dynamic>? fetchDoc) {
     if (GlobalVariables.Fetched_Document != null) {
       List<dynamic> listOfAllQuestions = [];
@@ -629,7 +724,7 @@ class _ChooseAccessState extends State<ChooseAccess> {
         GlobalVariables.Fetched_Document = null;
         return;
       }
-      if(GlobalVariables.idOfSurvey != '')
+      if (GlobalVariables.idOfSurvey != '')
         GlobalVariables.TITLE_OF_SURVEY = fetchDoc?['title'];
       String QuestionType;
       // listOfAllSections.removeAt(0);
@@ -639,19 +734,21 @@ class _ChooseAccessState extends State<ChooseAccess> {
         }
       }
       QuestionType =
-      listOfAllQuestions[GlobalWidgets.pwdWidgets.length]['question_type'];
+          listOfAllQuestions[GlobalWidgets.pwdWidgets.length]['question_type'];
       GlobalVariables.QUESTION_TYPE = QuestionType;
       GlobalVariables.sectionValue =
-      listOfAllQuestions[GlobalWidgets.pwdWidgets.length]['section'];
+          listOfAllQuestions[GlobalWidgets.pwdWidgets.length]['section'];
       Get.toNamed(Routes.EDIT_QUESTION_SCREEN);
-    }
-    else{
-      List<String> maintainerAfterRemovingDuplicate = GlobalVariables.MAINTAINER_LIST.toSet().toList();
+    } else {
+      List<String> maintainerAfterRemovingDuplicate =
+          GlobalVariables.MAINTAINER_LIST.toSet().toList();
       GlobalVariables.MAINTAINER_LIST.clear();
       setState(() {
-        GlobalVariables.MAINTAINER_LIST.addAll(maintainerAfterRemovingDuplicate);
+        GlobalVariables.MAINTAINER_LIST
+            .addAll(maintainerAfterRemovingDuplicate);
       });
-      List<String> viewerAfterRemovingDuplicate = GlobalVariables.VIEWER_LIST.toSet().toList();
+      List<String> viewerAfterRemovingDuplicate =
+          GlobalVariables.VIEWER_LIST.toSet().toList();
       GlobalVariables.VIEWER_LIST.clear();
       setState(() {
         GlobalVariables.VIEWER_LIST.addAll(viewerAfterRemovingDuplicate);
@@ -660,23 +757,20 @@ class _ChooseAccessState extends State<ChooseAccess> {
   }
 
   removeMaintainer(int index) {
-    if(GlobalVariables.MAINTAINER_LIST.isNotEmpty){
+    if (GlobalVariables.MAINTAINER_LIST.isNotEmpty) {
       debugPrint("here click");
       setState(() {
-        GlobalVariables.MAINTAINER_LIST.remove(GlobalVariables.MAINTAINER_LIST[index]);
+        GlobalVariables.MAINTAINER_LIST
+            .remove(GlobalVariables.MAINTAINER_LIST[index]);
       });
-    }else{
-
-    }
+    } else {}
   }
 
   removeViewer(int index) {
-    if(GlobalVariables.VIEWER_LIST.isNotEmpty){
+    if (GlobalVariables.VIEWER_LIST.isNotEmpty) {
       setState(() {
         GlobalVariables.VIEWER_LIST.remove(GlobalVariables.VIEWER_LIST[index]);
       });
-    }else{
-
-    }
+    } else {}
   }
 }

@@ -13,7 +13,7 @@ import 'package:snap_poll/global/global_widgets.dart';
 import 'package:snap_poll/main.dart';
 import 'package:snap_poll/widget/published.dart';
 import 'package:snap_poll/widget/templates.dart';
-
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../global/colors.dart';
 import '../global/global_variables.dart';
 import '../global/size_config.dart';
@@ -31,9 +31,10 @@ class _PendingSurveysState extends State<PendingSurveys>
   TabController? controller;
   int selectedIndexOfTab = 0;
   GlobalWidgets globalWidgets = GlobalWidgets();
-  List<DocumentSnapshot> tempSurveys = [];
-  List<DocumentSnapshot> maintainersList = [];
-  List<DocumentSnapshot> viewersList = [];
+  List<Map<String, dynamic>> tempSurveys = [];
+  List<Map<String, dynamic>> maintainersList = [];
+  List<Map<String, dynamic>> viewersList = [];
+  final supabase = Supabase.instance.client;
 
   @override
   void initState() {
@@ -290,7 +291,7 @@ class _PendingSurveysState extends State<PendingSurveys>
             //     )
             //   ],
             // ),
-            tempSurveys.length == 0
+            tempSurveys.isEmpty
                 ? Stack(
                     children: [
                       Container(
@@ -483,7 +484,7 @@ class _PendingSurveysState extends State<PendingSurveys>
                       // )
                     ],
                   ),
-            maintainersList.length == 0
+            maintainersList.isEmpty
                 ? Stack(
                     children: [
                       Container(
@@ -649,7 +650,7 @@ class _PendingSurveysState extends State<PendingSurveys>
                       // )
                     ],
                   ),
-            viewersList.length == 0
+            viewersList.isEmpty
                 ? Stack(
                     children: [
                       Container(
@@ -995,66 +996,61 @@ class _PendingSurveysState extends State<PendingSurveys>
 
   checkPendingSurveys() async {
     GlobalWidgets.showProgressLoader("Please wait".tr);
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    String? email = preferences.getString('email');
+    final SharedPreferences preferences = await SharedPreferences.getInstance();
+    final String? email = preferences.getString('email');
+    final supabase = Supabase.instance.client;
 
-    final QuerySnapshot querySnapshot =
-        await FirebaseFirestore.instance.collection('temp_surveys').get();
-    final List<DocumentSnapshot> firestoreResponseList = querySnapshot.docs;
-    GlobalWidgets.hideProgressLoader();
-    if (firestoreResponseList.isEmpty) {
-      print("No pending surveys");
-    } else {
-      List<DocumentSnapshot> maintainers = querySnapshot.docs;
-      List<DocumentSnapshot> viewers = querySnapshot.docs;
-      debugPrint(GlobalVariables.userId);
-      debugPrint(email);
-      firestoreResponseList.removeWhere(
-          (element) => (element.get('user_id') != GlobalVariables.userId));
-      // if(temp.isNotEmpty){
-      // for (var element in temp) {
-      //   if (element.get('user_id') != GlobalVariables.userId) {
-      //     temp.remove(element);
-      //   }
-      //
-      // }
-      // }
+    try {
+      final List<Map<String, dynamic>> response =
+          await supabase.from('temp_surveys').select('id, survey_data');
 
-      maintainers.removeWhere(
-          (element) => (!element.get('maintainers').contains(email)));
-      if (maintainers.isEmpty) {
-        print('you are not maintainer');
-      } else {
-        setState(() {
-          maintainersList = maintainers;
-        });
+      GlobalWidgets.hideProgressLoader();
+
+      if (response.isEmpty) {
+        print("No pending surveys");
+        return;
       }
-      viewers
-          .removeWhere((element) => (!element.get('viewers').contains(email)));
-      if (viewers.isEmpty) {
-        print('you are not viewer');
-      } else {
-        setState(() {
-          viewersList = viewers;
-        });
+
+      List<Map<String, dynamic>> admin = [];
+      List<Map<String, dynamic>> maintainers = [];
+      List<Map<String, dynamic>> viewers = [];
+
+      for (final record in response) {
+        final Map<String, dynamic> survey = record['survey_data'] ?? {};
+        final String? uid = survey['user_id'];
+        final List<dynamic> surveyMaintainers = survey['maintainers'] ?? [];
+        final List<dynamic> surveyViewers = survey['viewers'] ?? [];
+
+        if (uid == GlobalVariables.userId) {
+          admin.add(record);
+        }
+        if (surveyMaintainers.contains(email)) {
+          maintainers.add(record);
+        }
+        if (surveyViewers.contains(email)) {
+          viewers.add(record);
+        }
       }
-      if (firestoreResponseList.isEmpty) {
-        print("No pending surveys admin");
-      } else {
-        setState(() {
-          tempSurveys = firestoreResponseList;
-        });
-      }
+
+      setState(() {
+        tempSurveys = admin;
+        maintainersList = maintainers;
+        viewersList = viewers;
+      });
+
+      loadAllSurveys(); // ✅ Already migrated to Supabase
+    } catch (e) {
+      GlobalWidgets.hideProgressLoader();
+      print("Error fetching surveys: $e");
     }
-    loadAllSurveys();
   }
 
   Future<void> createCSV(int index) async {
     var docRef;
     if (GlobalVariables.roleType == 'maintainer')
-      docRef = maintainersList[index].reference;
+      docRef = maintainersList[index]['id'];
     else
-      docRef = tempSurveys[index].reference;
+      docRef = tempSurveys[index]['id'];
     final QuerySnapshot querySnapshot =
         await docRef.collection('results').get();
     final List<DocumentSnapshot> firestoreResponseList = querySnapshot.docs;
@@ -1116,9 +1112,9 @@ class _PendingSurveysState extends State<PendingSurveys>
     String filePath = '';
     // Create the CSV file path
     if (GlobalVariables.roleType == 'maintainer')
-      filePath = '${directory.path}/${maintainersList[index].reference.id}.csv';
+      filePath = '${directory.path}/${maintainersList[index]['id']}.csv';
     else
-      filePath = '${directory.path}/${tempSurveys[index].reference.id}.csv';
+      filePath = '${directory.path}/${tempSurveys[index]['id']}.csv';
 
     // Write the CSV string to the file
     File file = File(filePath);
@@ -1215,7 +1211,7 @@ class _PendingSurveysState extends State<PendingSurveys>
 
   pending(
     BuildContext context,
-    List<DocumentSnapshot<Object?>> tempSurveys,
+    List<Map<String, dynamic>> tempSurveys,
   ) {
     return Container(
       height: SizeConfig.screenHeight,
@@ -1229,9 +1225,8 @@ class _PendingSurveysState extends State<PendingSurveys>
               for (int index = 0; index < tempSurveys.length; index++)
                 GestureDetector(
                   onTap: () {
-                    // GlobalVariables.idOfSurvey = "temp/${maintainersList[index].reference.id}";
                     GlobalVariables.idOfSurvey =
-                        "temp/${tempSurveys[index].reference.id}";
+                        "temp/${tempSurveys[index]['id']}";
                     debugPrint(GlobalVariables.idOfSurvey);
                     GlobalVariables.roleType = 'admin';
                     Get.toNamed(Routes.CARD_FORM_LAYOUT);
@@ -1239,16 +1234,49 @@ class _PendingSurveysState extends State<PendingSurveys>
                   onLongPress: () {
                     GlobalVariables.roleType = 'admin';
                     showModalBottomSheet(
-                        context: context,
-                        builder: (context) {
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
+                      context: context,
+                      builder: (context) {
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              leading: Icon(Icons.save),
+                              title: globalWidgets.myTextRaleway(
+                                  context,
+                                  'Save results as CSV file'.tr,
+                                  ColorsX.black,
+                                  0,
+                                  0,
+                                  0,
+                                  0,
+                                  FontWeight.w400,
+                                  14),
+                              onTap: () async {
+                                bool isPermissionGranted =
+                                    await isStoragePermissionGranted();
+                                if (isPermissionGranted) {
+                                  createCSV(index);
+                                } else {
+                                  await requestStoragePermission();
+                                  isPermissionGranted =
+                                      await isStoragePermissionGranted();
+                                  if (isPermissionGranted) {
+                                    createCSV(index);
+                                  } else {
+                                    print('Storage permission not granted.');
+                                  }
+                                }
+                              },
+                            ),
+
+                            // Delete only visible for roles except maintainer/viewer
+                            if (!(GlobalVariables.roleType == 'maintainer' ||
+                                GlobalVariables.roleType == 'viewer'))
                               ListTile(
-                                leading: new Icon(Icons.save),
+                                leading: const Icon(Icons.delete),
                                 title: globalWidgets.myTextRaleway(
                                     context,
-                                    'Save results as CSV file'.tr,
+                                    'Delete survey'.tr,
                                     ColorsX.black,
                                     0,
                                     0,
@@ -1257,110 +1285,59 @@ class _PendingSurveysState extends State<PendingSurveys>
                                     FontWeight.w400,
                                     14),
                                 onTap: () async {
-                                  bool isPermissionGranted =
-                                      await isStoragePermissionGranted();
-                                  if (isPermissionGranted) {
-                                    createCSV(index);
-                                  } else {
-                                    await requestStoragePermission();
-                                    isPermissionGranted =
-                                        await isStoragePermissionGranted();
-                                    if (isPermissionGranted) {
-                                      createCSV(index);
-                                    } else {
-                                      print('Storage permission not granted.');
-                                    }
+                                  String surveyId = tempSurveys[index]['id'];
+                                  try {
+                                    await Supabase.instance.client
+                                        .from('surveys')
+                                        .delete()
+                                        .eq('id', surveyId);
+
+                                    setState(() {
+                                      tempSurveys.removeAt(index);
+                                    });
+                                    Navigator.pop(context);
+                                  } catch (error) {
+                                    print("Failed to delete survey: $error");
                                   }
                                 },
                               ),
-                              GlobalVariables.roleType == 'maintainer' ||
-                                      GlobalVariables.roleType == 'viewer'
-                                  ? Container()
-                                  : ListTile(
-                                      leading: const Icon(Icons.delete),
-                                      title: globalWidgets.myTextRaleway(
-                                          context,
-                                          'Delete survey'.tr,
-                                          ColorsX.black,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          FontWeight.w400,
-                                          14),
-                                      onTap: () {
-                                        var docRef =
-                                            tempSurveys[index].reference;
-                                        docRef.delete().then((value) {
-                                          // Delete successful
-                                          setState(() {
-                                            tempSurveys.removeAt(index);
-                                          });
-                                          Navigator.pop(
-                                              context); // Close the bottom sheet
-                                        }).catchError((error) {
-                                          // Delete failed
-                                          print(
-                                              "Failed to delete survey: $error");
-                                        });
-                                        // var docRef = maintainersList[index].reference;
-                                        // docRef.delete().then((value) {
-                                        //   // Delete successful
-                                        //   setState(() {
-                                        //     maintainersList.removeAt(index);
-                                        //   });
-                                        //   Navigator.pop(
-                                        //       context); // Close the bottom sheet
-                                        // }).catchError((error) {
-                                        //   // Delete failed
-                                        //   print("Failed to delete survey: $error");
-                                        // });
-                                      },
-                                    ),
-                              ListTile(
-                                leading: const Icon(Icons.edit),
-                                title: globalWidgets.myTextRaleway(
-                                    context,
-                                    'Edit Survey'.tr,
-                                    ColorsX.black,
-                                    0,
-                                    0,
-                                    0,
-                                    0,
-                                    FontWeight.w400,
-                                    14),
-                                onTap: () {
-                                  EasyLoading.instance.maskColor =
-                                      Colors.white.withOpacity(1);
-                                  EasyLoading.instance.maskType =
-                                      EasyLoadingMaskType.custom;
-                                  GlobalWidgets.showProgressLoader(
-                                      "Loading Survey");
-                                  GlobalVariables.MAINTAINER_LIST.clear();
-                                  GlobalVariables.VIEWER_LIST.clear();
-                                  if (GlobalVariables.roleType ==
-                                      'maintainer') {
-                                    DocumentSnapshot docRef =
-                                        maintainersList[index];
-                                    GlobalVariables.idOfSurvey =
-                                        'temp/' + docRef.id;
-                                    GlobalVariables.Fetched_Document =
-                                        docRef.data() as Map<String, dynamic>?;
-                                    Get.toNamed(Routes.CREATE_SURVEY_QUESTION);
-                                  } else {
-                                    DocumentSnapshot docRef =
-                                        tempSurveys[index];
-                                    GlobalVariables.idOfSurvey =
-                                        'temp/' + docRef.id;
-                                    GlobalVariables.Fetched_Document =
-                                        docRef.data() as Map<String, dynamic>?;
-                                    Get.toNamed(Routes.CREATE_SURVEY_QUESTION);
-                                  }
-                                },
-                              )
-                            ],
-                          );
-                        });
+
+                            // Edit
+                            ListTile(
+                              leading: const Icon(Icons.edit),
+                              title: globalWidgets.myTextRaleway(
+                                  context,
+                                  'Edit Survey'.tr,
+                                  ColorsX.black,
+                                  0,
+                                  0,
+                                  0,
+                                  0,
+                                  FontWeight.w400,
+                                  14),
+                              onTap: () {
+                                EasyLoading.instance.maskColor =
+                                    Colors.white.withOpacity(1);
+                                EasyLoading.instance.maskType =
+                                    EasyLoadingMaskType.custom;
+                                GlobalWidgets.showProgressLoader(
+                                    "Loading Survey");
+
+                                GlobalVariables.MAINTAINER_LIST.clear();
+                                GlobalVariables.VIEWER_LIST.clear();
+
+                                final Map<String, dynamic> surveyData =
+                                    tempSurveys[index];
+                                GlobalVariables.idOfSurvey =
+                                    'temp/${surveyData['id'] ?? ''}';
+                                GlobalVariables.Fetched_Document = surveyData;
+                                Get.toNamed(Routes.CREATE_SURVEY_QUESTION);
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
                   },
                   child: Card(
                     elevation: 5,
@@ -1378,7 +1355,7 @@ class _PendingSurveysState extends State<PendingSurveys>
                           ),
                           globalWidgets.myText(
                               context,
-                              '${tempSurveys[index]["title"]}',
+                              '${tempSurveys[index]["survey_data"]["title"]}',
                               ColorsX.black,
                               0,
                               10,
@@ -1388,7 +1365,7 @@ class _PendingSurveysState extends State<PendingSurveys>
                               15),
                           globalWidgets.myTextCustom(
                               context,
-                              '${tempSurveys[index]["short_description"]}',
+                              '${tempSurveys[index]["survey_data"]["short_description"]}',
                               ColorsX.black.withOpacity(0.7),
                               0,
                               10,
@@ -1398,8 +1375,7 @@ class _PendingSurveysState extends State<PendingSurveys>
                               13),
                           globalWidgets.myText(
                               context,
-                              '${tempSurveys[index]["questions"].length} Questions  |  '
-                              '${tempSurveys[index]["sections"].length} Sections',
+                              '${(tempSurveys[index]["survey_data"]["questions"] ?? []).length} Questions  |  ${(tempSurveys[index]["survey_data"]["sections"] ?? []).length} Sections',
                               ColorsX.black.withOpacity(0.7),
                               0,
                               10,
@@ -1412,7 +1388,7 @@ class _PendingSurveysState extends State<PendingSurveys>
                             onTap: () {
                               debugPrint("tapped");
                               GlobalVariables.idOfSurvey =
-                                  tempSurveys[index].reference.id;
+                                  tempSurveys[index]['id'];
                               debugPrint(GlobalVariables.idOfSurvey);
                               publishDialog(context, index);
                             },
@@ -1424,15 +1400,16 @@ class _PendingSurveysState extends State<PendingSurveys>
                                 border: Border.all(color: ColorsX.appBarColor),
                               ),
                               child: globalWidgets.myText(
-                                  context,
-                                  'Publish'.tr,
-                                  ColorsX.appBarColor,
-                                  3,
-                                  10,
-                                  10,
-                                  3,
-                                  FontWeight.w500,
-                                  14),
+                                context,
+                                'Publish'.tr,
+                                ColorsX.appBarColor,
+                                3,
+                                10,
+                                10,
+                                3,
+                                FontWeight.w500,
+                                14,
+                              ),
                             ),
                           ),
                         ],
@@ -1449,7 +1426,7 @@ class _PendingSurveysState extends State<PendingSurveys>
 
   maintainers(
     BuildContext context,
-    List<DocumentSnapshot<Object?>> tempSurveys,
+    List<Map<String, dynamic>> tempSurveys,
   ) {
     return Container(
       height: SizeConfig.screenHeight,
@@ -1464,7 +1441,7 @@ class _PendingSurveysState extends State<PendingSurveys>
                 GestureDetector(
                   onTap: () {
                     GlobalVariables.idOfSurvey =
-                        "temp/${tempSurveys[index].reference.id}";
+                        "temp/${tempSurveys[index]['id']}";
                     debugPrint(GlobalVariables.idOfSurvey);
                     GlobalVariables.roleType = 'maintainer';
                     Get.toNamed(Routes.CARD_FORM_LAYOUT);
@@ -1522,8 +1499,7 @@ class _PendingSurveysState extends State<PendingSurveys>
                                           FontWeight.w400,
                                           14),
                                       onTap: () {
-                                        var docRef =
-                                            tempSurveys[index].reference;
+                                        var docRef = tempSurveys[index]['id'];
                                         docRef.delete().then((value) {
                                           // Delete successful
                                           setState(() {
@@ -1569,12 +1545,12 @@ class _PendingSurveysState extends State<PendingSurveys>
                                       EasyLoadingMaskType.custom;
                                   GlobalWidgets.showProgressLoader(
                                       "Loading Survey");
-                                  DocumentSnapshot docRef =
-                                      maintainersList[index];
+
+                                  final surveyData = maintainersList[index];
                                   GlobalVariables.idOfSurvey =
-                                      'temp/' + docRef.id;
-                                  GlobalVariables.Fetched_Document =
-                                      docRef.data() as Map<String, dynamic>?;
+                                      'temp/' + (surveyData['id'] ?? '');
+                                  GlobalVariables.Fetched_Document = surveyData;
+
                                   Get.toNamed(Routes.CREATE_SURVEY_QUESTION);
                                 },
                               )
@@ -1659,7 +1635,7 @@ class _PendingSurveysState extends State<PendingSurveys>
 
   viewer(
     BuildContext context,
-    List<DocumentSnapshot<Object?>> tempSurveys,
+    List<Map<String, dynamic>> tempSurveys,
   ) {
     return Container(
       height: SizeConfig.screenHeight,
@@ -1674,7 +1650,7 @@ class _PendingSurveysState extends State<PendingSurveys>
                 GestureDetector(
                   onTap: () {
                     GlobalVariables.idOfSurvey =
-                        "temp/${tempSurveys[index].reference.id}";
+                        "temp/${tempSurveys[index]['id']}";
                     debugPrint(GlobalVariables.idOfSurvey);
                     GlobalVariables.roleType = 'viewer';
                     Get.toNamed(Routes.CARD_FORM_LAYOUT);

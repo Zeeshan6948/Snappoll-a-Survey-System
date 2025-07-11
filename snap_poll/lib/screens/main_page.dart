@@ -1,7 +1,6 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -300,7 +299,7 @@ class _MainPageState extends State<MainPage> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? email = preferences.getString('email');
     if (email == null || email == '') {
-      FirebaseAuth.instance.signOut().then((value) {
+      Supabase.instance.client.auth.signOut().then((value) {
         print("Signed Out");
         // Navigator.push(
         //     context,
@@ -315,39 +314,53 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  loadAllUsers(String? email) async {
-    GlobalWidgets.showProgressLoader("Please wait".tr);
+  Future<void> loadAllUsers(String? email) async {
+    if (email == null) return;
 
-    final QuerySnapshot querySnapshot =
-        await FirebaseFirestore.instance.collection('users').get();
-    final List<DocumentSnapshot> firestoreResponseList = querySnapshot.docs;
-    GlobalVariables.allUsers = firestoreResponseList;
-    GlobalWidgets.hideProgressLoader();
-    if (firestoreResponseList.isEmpty) {
-      print("No results");
-      saveEmail(context, email!);
-    } else {
-      List<DocumentSnapshot> temp = firestoreResponseList;
-      firestoreResponseList
-          .removeWhere((element) => (element.get('email') != email));
-      if (firestoreResponseList.isEmpty) {
-        saveEmail(context, email!);
-      } else {}
+    GlobalWidgets.showProgressLoader("Please wait");
+
+    final supabase = Supabase.instance.client;
+
+    try {
+      // Fetch all users (or filter directly)
+      final List users = await supabase
+          .from('users')
+          .select()
+          .eq('email', email); // Filter directly for the email
+
+      GlobalWidgets.hideProgressLoader();
+
+      if (users.isEmpty) {
+        print("No results");
+        await saveEmail(context, email); // Save the new user
+      } else {
+        print("User already exists");
+        // Optional: do something with the existing user
+      }
+    } catch (error) {
+      GlobalWidgets.hideProgressLoader();
+      GlobalWidgets.showToast("Error loading users: $error");
     }
   }
 
-  saveEmail(BuildContext context, String my_email_address) async {
+  Future<void> saveEmail(BuildContext context, String email) async {
     GlobalWidgets.showProgressLoader('');
-    var collection = FirebaseFirestore.instance.collection('users');
-    Map<String, dynamic> map = {
-      'email': my_email_address,
-    };
-    var docRef = await collection.add(map);
-    var documentId = docRef.id;
 
-    GlobalWidgets.hideProgressLoader();
-    if (documentId.toString().isEmpty) {
-      GlobalWidgets.showToast('User not saved. Try again'.tr);
+    final supabase = Supabase.instance.client;
+
+    try {
+      final response = await supabase.from('users').insert({'email': email});
+
+      GlobalWidgets.hideProgressLoader();
+
+      if (response == null || response.isEmpty) {
+        GlobalWidgets.showToast('User not saved. Try again');
+      } else {
+        GlobalWidgets.showToast('User saved successfully');
+      }
+    } catch (error) {
+      GlobalWidgets.hideProgressLoader();
+      GlobalWidgets.showToast("Error saving user: $error");
     }
   }
 
